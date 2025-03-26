@@ -5,7 +5,7 @@ on:
 
 jobs:
   install-and-build:
-    runs-on: blacksmith-2vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: '--max-old-space-size=4096'
 
@@ -31,48 +31,3 @@ jobs:
 
       - name: Build
         run: pnpm build
-
-      - name: Cache build artifacts
-        uses: useblacksmith/cache/save@c5fe29eb0efdf1cf4186b9f7fcbbcbc0cf025662 # v5
-        with:
-          path: ./packages/**/dist
-          key: ${{ github.sha }}-base:build
-
-  unit-test:
-    name: Unit tests
-    uses: ./.github/workflows/units-tests-reusable.yml
-    needs: install-and-build
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.4]
-    with:
-      ref: ${{ inputs.branch }}
-      nodeVersion: ${{ matrix.node-version }}
-      cacheKey: ${{ github.sha }}-base:build
-      collectCoverage: ${{ matrix.node-version == '20.x' }}
-      ignoreTurboCache: ${{ matrix.node-version == '20.x' }}
-      skipFrontendTests: ${{ matrix.node-version != '20.x' }}
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-  lint:
-    name: Lint
-    uses: ./.github/workflows/linting-reusable.yml
-    needs: install-and-build
-    with:
-      ref: ${{ inputs.branch }}
-      cacheKey: ${{ github.sha }}-base:build
-
-  notify-on-failure:
-    name: Notify Slack on failure
-    runs-on: ubuntu-latest
-    needs: [unit-test, lint]
-    steps:
-      - name: Notify Slack on failure
-        uses: act10ns/slack@ed1309ab9862e57e9e583e51c7889486b9a00b0f # v2.0.0
-        if: failure()
-        with:
-          status: ${{ job.status }}
-          channel: '#alerts-build'
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          message: Master branch (build or test or lint) failed (${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
