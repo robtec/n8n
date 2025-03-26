@@ -29,5 +29,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: List
-        run: ls -la
+      - name: Find nodes-base JSON
+        run: |
+          cd packages/nodes-base/dist/
+          mkdir n8n-exported-json/
+          find . -type f -name "*.json" -exec cp --parents {} n8n-exported-json/ \;
