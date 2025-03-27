@@ -34,3 +34,10 @@ jobs:
           cd packages/nodes-base/dist/
           mkdir n8n-exported-json/
           find . -type f -name "*.json" -exec cp --parents {} n8n-exported-json/ \;
+
+      - name: Archive JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: n8n-exported-json
+          path: |
+            n8n-exported-json/
