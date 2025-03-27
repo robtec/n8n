@@ -40,4 +40,4 @@ jobs:
         with:
           name: n8n-exported-json
           path: |
-            n8n-exported-json/
+            packages/nodes-base/dist/n8n-exported-json/
